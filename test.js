@@ -2,6 +2,14 @@ const { expect } = require('chai')
 const { getLocationData, getTime } = require('./app')
 
 describe('getLocationData', () => {
+  it('should take a string as an argument', () => {
+    expect(getTime(60616)).to.throw(TypeError)
+    expect(getTime({ postalCode: 60616 })).to.throw(TypeError)
+    expect(getTime(null)).to.throw(TypeError)
+    expect(getTime(NaN)).to.throw(TypeError)
+    expect(getTime(true)).to.throw(TypeError)
+    expect(getTime(undefined)).to.throw(TypeError)
+  })
   it('should return an object with name, locationKey, and GmtOffset properties', async () => {
     const locationData = await getLocationData()
     expect(locationData).to.be.an('object')
@@ -59,4 +67,8 @@ describe('getTime', () => {
     expect(getMinute(mumbai) % 60).to.equal((getMinute(GmtTime) + 30) % 60)
     // For now, we will assume that if the hours and minutes are the correct, the period is as well.
   })
+})
+
+describe('getWeather', () => {
+  it('should take ')
 })
