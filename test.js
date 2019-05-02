@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const { getLocationData, getTime } = require('./app')
+const { getLocationData, getTime, getConditions } = require('./app')
 
 describe('getLocationData', () => {
   it('should take a string as an argument', () => {
@@ -33,9 +33,9 @@ describe('getTime', () => {
     expect(time).to.be.a('string')
   })
   it('should return the correct time provided a UTC offset', () => {
-    const localDate = new Date(),
-      localTime = localDate.toLocaleTimeString(),
-      localTimezoneOffset = localDate.getTimezoneOffset() / -60
+    const localDate = new Date()
+    const localTime = localDate.toLocaleTimeString()
+    const localTimezoneOffset = localDate.getTimezoneOffset() / -60
 
     const GmtTime = new Date(
       localDate.getTime() + localTimezoneOffset * 1000 * 60 * 60
@@ -69,6 +69,21 @@ describe('getTime', () => {
   })
 })
 
-describe('getWeather', () => {
-  it('should take ')
+describe('getConditions', () => {
+  it('should take a string as an argument', () => {
+    expect(getTime(60616)).to.throw(TypeError)
+    expect(getTime({ postalCode: 60616 })).to.throw(TypeError)
+    expect(getTime(null)).to.throw(TypeError)
+    expect(getTime(NaN)).to.throw(TypeError)
+    expect(getTime(true)).to.throw(TypeError)
+    expect(getTime(undefined)).to.throw(TypeError)
+  })
+  it('should return a string containing a temperature and a unit', () => {
+    const conditions = getConditions(348308)
+    const temperature = conditions.split(' ')[0]
+    const unit = conditions.split(' ')[1]
+
+    expect(temperature * 0).to.equal(0)
+    expect(unit).to.equal('F')
+  })
 })
