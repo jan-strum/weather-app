@@ -1,89 +1,114 @@
-const { expect } = require('chai')
-const { getLocationData, getTime, getConditions } = require('./app')
+/* eslint-disable no-unused-expressions */
+const { expect } = require("chai")
+const { getLocationData, getDate, getConditions } = require("./app")
 
-describe('getLocationData', () => {
-  it('should take a string as an argument', () => {
-    expect(getTime(60616)).to.throw(TypeError)
-    expect(getTime({ postalCode: 60616 })).to.throw(TypeError)
-    expect(getTime(null)).to.throw(TypeError)
-    expect(getTime(NaN)).to.throw(TypeError)
-    expect(getTime(true)).to.throw(TypeError)
-    expect(getTime(undefined)).to.throw(TypeError)
+describe("getLocationData", () => {
+  it("should take a string or a number as an argument", () => {
+    expect(getLocationData({ postalCode: 60616 })).to.throw(TypeError)
+    expect(getLocationData(null)).to.throw(TypeError)
+    expect(getLocationData(NaN)).to.throw(TypeError)
+    expect(getLocationData(true)).to.throw(TypeError)
+    expect(getLocationData(undefined)).to.throw(TypeError)
   })
-  it('should return an object with name, locationKey, and GmtOffset properties', async () => {
-    const locationData = await getLocationData()
-    expect(locationData).to.be.an('object')
-    expect(locationData).to.have.property('name')
-    expect(locationData).to.have.property('locationKey')
-    expect(locationData).to.have.property('GmtOffset')
+  it("should return an object with name, locationKey, and GmtOffset properties given a valid input", async () => {
+    const locationData = await getLocationData("Berlin")
+    expect(locationData).to.be.an("object")
+    expect(locationData).to.have.property("name")
+    expect(locationData).to.have.property("locationKey")
+    expect(locationData).to.have.property("GmtOffset")
   })
 })
 
-describe('getTime', () => {
-  it('should take a number as an argument', () => {
-    expect(getTime('-7')).to.throw(TypeError)
-    expect(getTime({ offset: 7 })).to.throw(TypeError)
-    expect(getTime(null)).to.throw(TypeError)
-    expect(getTime(NaN)).to.throw(TypeError)
-    expect(getTime(true)).to.throw(TypeError)
-    expect(getTime(undefined)).to.throw(TypeError)
+describe("getDate", () => {
+  it("should take a number as an argument", () => {
+    expect(getDate("-7")).to.throw(TypeError)
+    expect(getDate({ offset: 7 })).to.throw(TypeError)
+    expect(getDate(null)).to.throw(TypeError)
+    expect(getDate(NaN)).to.throw(TypeError)
+    expect(getDate(true)).to.throw(TypeError)
+    expect(getDate(undefined)).to.throw(TypeError)
   })
-  it('should return a time as a string', () => {
-    const time = getTime(-6)
-    expect(time).to.be.a('string')
+  it("should return a time as a Date instance", () => {
+    const time = getDate(-6)
+    expect(time).to.be.an.instanceOf(Date)
   })
-  it('should return the correct time provided a UTC offset', () => {
+  it("should return the correct time provided a UTC offset", () => {
+    const msPerHour = 3600000
     const localDate = new Date()
-    const localTime = localDate.toLocaleTimeString()
+    // const localTime = localDate.toLocaleTimeString()
     const localTimezoneOffset = localDate.getTimezoneOffset() / -60
 
     const GmtTime = new Date(
-      localDate.getTime() + localTimezoneOffset * 1000 * 60 * 60
+      localDate.getTime() + localTimezoneOffset * msPerHour
     )
 
-    const localTimeTest = getTime(localTimezoneOffset),
-      chicago = getTime(-5),
-      newYork = getTime(-4),
-      mumbai = getTime(5.5)
+    const localTimeTest = getDate(localTimezoneOffset),
+      chicago = getDate(-5),
+      newYork = getDate(-4),
+      mumbai = getDate(5.5)
 
     // We will compare hours, minutes, and period (AM and PM), but not seconds, so as to account for computation time.
-    const getHour = dateString => Number(dateString.split(':')[0])
-    const getMinute = dateString => Number(dateString.split(':')[1])
-    const getPeriod = dateString => dateString.split(' ')[1]
+    const getHour = date =>
+      date
+        .toString()
+        .split(" ")[4]
+        .split(":")[0]
 
-    expect(getHour(localTimeTest)).to.equal(getHour(localTime))
-    expect(getMinute(localTimeTest)).to.equal(getMinute(localTime))
-    expect(getPeriod(localTimeTest)).to.equal(getPeriod(localTime))
+    const getMinute = date =>
+      date
+        .toString()
+        .split(" ")[4]
+        .split(":")[1]
+
+    const getPeriod = date => date.toLocaleTimeString().split(" ")[1]
+
+    const checkPeriod = date => {
+      const GmtOffset = date.getTimezoneOffset() / -60
+      if (getHour(GmtTime) + GmtOffset < 12 && getPeriod(date) === "AM") {
+        return true
+      } else if (
+        getHour(GmtTime) + GmtOffset >= 12 &&
+        getPeriod(date) === "PM"
+      ) {
+        return true
+      } else {
+        return false
+      }
+    }
+
+    expect(getHour(localTimeTest)).to.equal(getHour(localDate))
+    expect(getMinute(localTimeTest)).to.equal(getMinute(localDate))
+    expect(getPeriod(localTimeTest)).to.equal(getPeriod(localDate))
 
     expect(getHour(chicago)).to.equal(getHour(GmtTime - 5))
     expect(getMinute(chicago)).to.equal(getMinute(GmtTime))
-    // For now, we will assume that if the hours and minutes are the correct, the period is as well.
+    expect(checkPeriod(chicago)).to.be.true
 
     expect(getHour(newYork)).to.equal(getHour(GmtTime - 4))
     expect(getMinute(newYork)).to.equal(getMinute(GmtTime))
-    // For now, we will assume that if the hours and minutes are the correct, the period is as well.
+    expect(checkPeriod(newYork)).to.be.true
 
     expect(getHour(mumbai)).to.equal(getHour(GmtTime + 5))
     expect(getMinute(mumbai) % 60).to.equal((getMinute(GmtTime) + 30) % 60)
-    // For now, we will assume that if the hours and minutes are the correct, the period is as well.
+    expect(checkPeriod(mumbai)).to.be.true
   })
 })
 
-describe('getConditions', () => {
-  it('should take a string as an argument', () => {
-    expect(getTime(60616)).to.throw(TypeError)
-    expect(getTime({ postalCode: 60616 })).to.throw(TypeError)
-    expect(getTime(null)).to.throw(TypeError)
-    expect(getTime(NaN)).to.throw(TypeError)
-    expect(getTime(true)).to.throw(TypeError)
-    expect(getTime(undefined)).to.throw(TypeError)
+describe("getConditions", () => {
+  it("should take a string as an argument", () => {
+    expect(getConditions(60616)).to.throw(TypeError)
+    expect(getConditions({ postalCode: 60616 })).to.throw(TypeError)
+    expect(getConditions(null)).to.throw(TypeError)
+    expect(getConditions(NaN)).to.throw(TypeError)
+    expect(getConditions(true)).to.throw(TypeError)
+    expect(getConditions(undefined)).to.throw(TypeError)
   })
-  it('should return a string containing a temperature and a unit', () => {
+  it("should return a string containing a temperature and a unit", () => {
     const conditions = getConditions(348308)
-    const temperature = conditions.split(' ')[0]
-    const unit = conditions.split(' ')[1]
+    const temperature = conditions.split(" ")[0]
+    const unit = conditions.split(" ")[1]
 
     expect(temperature * 0).to.equal(0)
-    expect(unit).to.equal('F')
+    expect(unit).to.equal("F")
   })
 })
