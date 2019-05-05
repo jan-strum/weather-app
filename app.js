@@ -32,8 +32,24 @@ const getLocationData = async locationString => {
   }
 }
 
+const getDate = GmtOffset => {
+  const msPerMinute = 60000,
+    msPerHour = 3600000
+
+  const remoteUtc = GmtOffset * msPerHour
+
+  const localDate = new Date()
+  const localUtc =
+    localDate.getTime() + localDate.getTimezoneOffset() * msPerMinute
+
+  const remoteDate = new Date(localUtc + remoteUtc)
+
+  return remoteDate // We will return a date instance so that we can easily test that the period (AM/PM) is correct, but we will coerce this into a LocalTimeString in printTimeAndConditions for logging purposes.
+}
+
 module.exports = {
-  getLocationData
+  getLocationData,
+  getDate
 }
 
 app.listen(PORT, () => {
