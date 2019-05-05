@@ -47,9 +47,26 @@ const getDate = GmtOffset => {
   return remoteDate // We will return a date instance so that we can easily test that the period (AM/PM) is correct, but we will coerce this into a LocalTimeString in printTimeAndConditions for logging purposes.
 }
 
+const getConditions = async locationKey => {
+  locationKey = locationKey + ''
+  try {
+    const response = await axios({
+      method: 'get',
+      url: `http://dataservice.accuweather.com/currentconditions/v1/${locationKey}.json?language=en&apikey=${API_KEY}`
+    })
+    const temperature = response.data[0].Temperature.Imperial.Value
+    const unit = response.data[0].Temperature.Imperial.Unit
+
+    return `${temperature} ${unit}`
+  } catch (err) {
+    console.log(err)
+  }
+}
+
 module.exports = {
   getLocationData,
-  getDate
+  getDate,
+  getConditions
 }
 
 app.listen(PORT, () => {
