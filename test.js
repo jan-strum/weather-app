@@ -1,6 +1,11 @@
 /* eslint-disable no-unused-expressions */
 const { expect } = require('chai')
-const { getLocationData, getDate, getConditions } = require('./app')
+const {
+  getLocationData,
+  getDate,
+  getConditions,
+  printTimeAndConditions
+} = require('./app')
 
 describe('getLocationData', () => {
   it('should return an object with name, locationKey, and GmtOffset properties given a valid input', async () => {
@@ -97,5 +102,17 @@ describe('getConditions', () => {
 
     expect(temperature * 0).to.equal(0)
     expect(unit).to.equal('F')
+  })
+})
+
+describe('printTimeAndConditions', () => {
+  it('should return a string', async () => {
+    const output = await printTimeAndConditions([
+      '/Chicago',
+      10028,
+      'Mumbai',
+      "No Man's Land"
+    ])
+    expect(output).to.be.a('string')
   })
 })
