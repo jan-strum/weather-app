@@ -4,7 +4,8 @@ const {
   getLocationData,
   getDate,
   getConditions,
-  printTimeAndConditions
+  buildMessage,
+  printmessages
 } = require('./app')
 
 describe('getLocationData', () => {
@@ -114,15 +115,23 @@ describe('getConditions', () => {
   })
 })
 
-describe('printTimeAndConditions', () => {
+describe('buildMessage', () => {
+  it('should return a string', async () => {
+    const locationData = await getLocationData('Oaxaca')
+    const message = await buildMessage(locationData)
+    expect(message).to.be.a('string')
+  })
+})
+
+describe('printmessages', () => {
   it('should return an array of strings', async () => {
-    const output = await printTimeAndConditions([
+    const messages = await printmessages([
+      "No Man's Land",
       'Chicago',
       10028,
       'Mumbai',
-      "No Man's Land"
     ])
-    expect(output).to.be.an('array')
-    output.forEach(e => expect(e).to.be.a('string'))
+    expect(messages).to.be.an('array')
+    messages.forEach(message => expect(message).to.be.a('string'))
   })
 })

@@ -16,11 +16,11 @@ const getLocationData = async locationString => {
       const GmtOffset = response.data[0].TimeZone.GmtOffset
       return { name, locationKey, GmtOffset }
     } else {
-      return {
+      return { // We will return an object with the same keys as above, in addition to an 'error' key, for ease of testing.
         name: locationString,
         locationKey: 'N/A',
         GmtOffset: 'N/A',
-        error: `No location matching "${locationString}" could be found. Please try again.`
+        error: `No location matching "${locationString}" could be found. Please try again.\n`
       }
     }
   } catch (error) {
@@ -62,35 +62,40 @@ const getConditions = async locationKey => {
   }
 }
 
-const printTimeAndConditions = locationsArray => {
-  const outputArray = []
+const buildMessage = async location => {
+  const locationData = await getLocationData(location)
+  let message
+
+  if (!locationData.error) {
+    const { name, locationKey, GmtOffset } = locationData
+    const time = getDate(GmtOffset).toLocaleTimeString()
+    const conditions = await getConditions(locationKey)
+    message = `The time in ${name} is ${time}. The temperature is ${conditions}.\n`
+  } else {
+    message = locationData.error
+  }
+
+  return message
+}
+
+const printmessages = locationsArray => {
+  const messages = []
 
   locationsArray.forEach(async location => {
-    const locationData = await getLocationData(location)
-    if (!locationData.error) {
-      const { name, locationKey, GmtOffset } = locationData
-      const time = getDate(GmtOffset).toLocaleTimeString()
-      const conditions = await getConditions(locationKey)
-      console.log(
-        `The time in ${name} is ${time}. The temperature is ${conditions}.\n`
-      )
-      outputArray.push(
-        `The time in ${name} is ${time}. The temperature is ${conditions}.\n`
-      )
-    } else {
-      console.log(locationData.error)
-      outputArray.push(`locationData.error\n`)
-    }
-  });
+    const message = await buildMessage(location)
+    console.log(message)
+    messages.push(message)
+  })
 
-  return outputArray
+  return messages // We will return the messages for ease of testing.
 }
 
 module.exports = {
   getLocationData,
   getDate,
   getConditions,
-  printTimeAndConditions
+  buildMessage,
+  printmessages
 }
 
 const PORT = 1337
