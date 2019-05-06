@@ -2,6 +2,8 @@ const axios = require('axios')
 const express = require('express')
 const app = express()
 
+const { localGmtOffsetMs } = require('./helpers')
+
 const API_KEY = 'QryQ0OtaX1UugKQiAG2UXAWUschkpVsX'
 
 const getLocationData = async locationString => {
@@ -29,34 +31,29 @@ const getLocationData = async locationString => {
 }
 
 const getDate = GmtOffsetHr => {
-  const msPerMn = 60000,
-        msPerHr = 3600000
-
+  const msPerHr = 3600000
   const remoteGmtOffsetMs = GmtOffsetHr * msPerHr
-
-  const localDate = new Date()
-  const localTime = localDate.getTime()
-  const localTimezoneOffset = localDate.getTimezoneOffset()
-
-  const localGmtOffsetMs = localTime + localTimezoneOffset * msPerMn
-
   const totalGmtOffsetMs = localGmtOffsetMs + remoteGmtOffsetMs
 
-  const remoteDate = new Date(totalGmtOffsetMs)
+  const date = new Date(totalGmtOffsetMs)
 
-  return remoteDate // We will return a date instance so that we can easily test that the period (AM/PM) is correct, but we will coerce this into a LocalTimeString in printTimeAndConditions for logging purposes.
+  return date // We will return a date instance so that we can easily test that the period (AM/PM) is correct, but we will coerce this into a LocalTimeString in printTimeAndConditions for logging purposes.
 }
 
-const getConditions = async locationKey => {
+const getCurrentConditions = async locationKey => {
   try {
     const response = await axios({
       method: 'get',
       url: `http://dataservice.accuweather.com/currentconditions/v1/${locationKey}.json?language=en&apikey=${API_KEY}`
     })
+
     const temperature = response.data[0].Temperature.Imperial.Value
     const unit = response.data[0].Temperature.Imperial.Unit
 
-    return `${temperature} ${unit}`
+    const currentconditions = `${temperature} ${unit}`
+
+    return currentconditions
+
   } catch (error) {
     console.log(error)
   }
@@ -69,8 +66,8 @@ const buildMessage = async location => {
   if (!locationData.error) {
     const { name, locationKey, GmtOffset } = locationData
     const time = getDate(GmtOffset).toLocaleTimeString()
-    const conditions = await getConditions(locationKey)
-    message = `The time in ${name} is ${time}. The temperature is ${conditions}.\n`
+    const currentConditions = await getCurrentConditions(locationKey)
+    message = `The time in ${name} is ${time}. The temperature is ${currentConditions}.\n`
   } else {
     message = locationData.error
   }
@@ -93,7 +90,7 @@ const printmessages = locationsArray => {
 module.exports = {
   getLocationData,
   getDate,
-  getConditions,
+  getCurrentConditions,
   buildMessage,
   printmessages
 }
