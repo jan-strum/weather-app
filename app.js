@@ -4,7 +4,7 @@ const app = express()
 
 const { localGmtOffsetMs } = require('./helpers')
 
-const API_KEY = 'QryQ0OtaX1UugKQiAG2UXAWUschkpVsX'
+const { API_KEY } = require('./secrets')
 
 const getLocationData = async locationString => {
   try {
