@@ -1,3 +1,13 @@
+const msPerMn = 60000
+
+const localDate = new Date()
+const localGmtOffsetMn = localDate.getTimezoneOffset()
+
+const localTime = localDate.getTime()
+const localGmtOffsetMs = localTime + localGmtOffsetMn * msPerMn
+
+const GmtTime = new Date(localGmtOffsetMs)
+
 const getHour = date => {
   return Number(
     date
@@ -20,16 +30,6 @@ const getPeriod = date => {
   return date.toLocaleTimeString()
     .split(' ')[1]
 }
-
-const msPerMn = 60000
-
-const localDate = new Date()
-const localGmtOffsetMn = localDate.getTimezoneOffset()
-
-const localTime = localDate.getTime()
-const localGmtOffsetMs = localTime + localGmtOffsetMn * msPerMn
-
-const GmtTime = new Date(localGmtOffsetMs)
 
 const checkPeriod = (date, GmtOffsetHr) => {
   const roundedGmtOffset =

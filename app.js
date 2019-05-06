@@ -12,6 +12,7 @@ const getLocationData = async locationString => {
       method: 'get',
       url: `http://dataservice.accuweather.com/locations/v1/search?q=${locationString}&apikey=${API_KEY}`
     })
+
     if (response.data[0]) {
       const name = response.data[0].LocalizedName
       const locationKey = response.data[0].Key
@@ -37,7 +38,7 @@ const getDate = GmtOffsetHr => {
 
   const date = new Date(totalGmtOffsetMs)
 
-  return date // We will return a date instance so that we can easily test that the period (AM/PM) is correct, but we will coerce this into a LocalTimeString in printTimeAndConditions for logging purposes.
+  return date // We will return a date instance so that we can easily test that the period (AM/PM) is correct, but we will coerce this into a LocalTimeString in buildMessage for logging purposes.
 }
 
 const getCurrentConditions = async locationKey => {
@@ -47,8 +48,10 @@ const getCurrentConditions = async locationKey => {
       url: `http://dataservice.accuweather.com/currentconditions/v1/${locationKey}.json?language=en&apikey=${API_KEY}`
     })
 
-    const temperature = response.data[0].Temperature.Imperial.Value
-    const unit = response.data[0].Temperature.Imperial.Unit
+    const temperature = response.data[0]
+      .Temperature.Imperial.Value
+    const unit = response.data[0]
+      .Temperature.Imperial.Unit
 
     const currentconditions = `${temperature} ${unit}`
 

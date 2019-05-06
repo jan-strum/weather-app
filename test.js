@@ -10,11 +10,8 @@ const {
 const {
   getHour,
   getMinute,
-  getPeriod,
   checkPeriod,
-  localDate,
   GmtTime,
-  localGmtOffsetMn,
 } = require('./helpers')
 
 describe('getLocationData', () => {
@@ -71,20 +68,14 @@ describe('getCurrentConditions', () => {
 
 describe('buildMessage', () => {
   it('should return a string', async () => {
-    const locationData = await getLocationData('Oaxaca')
-    const message = await buildMessage(locationData)
+    const message = await buildMessage('Oaxaca')
     expect(message).to.be.a('string')
   })
 })
 
 describe('printmessages', () => {
   it('should return an array of strings', async () => {
-    const messages = await printmessages([
-      "No Man's Land",
-      'Chicago',
-      10028,
-      'Mumbai',
-    ])
+    const messages = await printmessages(["No Man's Land", 'Chicago', 10028, 'Mumbai'])
     expect(messages).to.be.an('array')
     messages.forEach(message => expect(message).to.be.a('string'))
   })
