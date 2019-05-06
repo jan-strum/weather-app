@@ -22,19 +22,22 @@ describe('getDate', () => {
     const time = getDate(-6)
     expect(time).to.be.an.instanceOf(Date)
   })
-  it('should return the correct time provided a UTC offset', () => {
-    const msPerHour = 3600000
+  it('should return the correct time provided a GMT offset', () => {
+    const msPerMn = 60000
+
     const localDate = new Date()
-    const localTimezoneOffset = localDate.getTimezoneOffset() / -60
+    const localTimezoneOffset = localDate.getTimezoneOffset()
+    const localGmtOffsetHr = localTimezoneOffset / -60
 
-    const GmtTime = new Date(
-      localDate.getTime() + -localTimezoneOffset * msPerHour
-    )
+    const localTime = localDate.getTime()
+    const localGmtOffsetMs = localTime + localTimezoneOffset * msPerMn
 
-    const localTimeTest = getDate(localTimezoneOffset),
-      chicago = getDate(-5),
-      newYork = getDate(-4),
-      mumbai = getDate(5.5)
+    const GmtTime = new Date(localGmtOffsetMs)
+
+    const localDateTest = getDate(localGmtOffsetHr),
+      chicagoDate = getDate(-5),
+      newYorkDate = getDate(-4),
+      mumbaiDate = getDate(5.5)
 
     // We will compare hours, minutes, and period (AM and PM), but not seconds, so as to account for computation time.
     const getHour = date => {
@@ -55,42 +58,48 @@ describe('getDate', () => {
       )
     }
 
-    const getPeriod = date => date.toLocaleTimeString().split(' ')[1]
+    const getPeriod = date => date.toLocaleTimeString()
+      .split(' ')[1]
 
-    const checkPeriod = (date, GmtOffset) => {
+
+    const checkPeriod = (date, GmtOffsetHr) => {
       const roundedGmtOffset =
-        getMinute(GmtTime) < 30 ? Math.floor(GmtOffset) : Math.ceil(GmtOffset)
+        getMinute(GmtTime) < 30
+          ? Math.floor(GmtOffsetHr)
+          : Math.ceil(GmtOffsetHr)
       const remotePeriod = getPeriod(date)
-      const GmTHour = getHour(GmtTime)
+      const GmtHour = getHour(GmtTime)
 
-      if (GmTHour + roundedGmtOffset < 12 && remotePeriod === 'AM') {
+      if (GmtHour + roundedGmtOffset < 12 &&
+        remotePeriod === 'AM') {
         return true
-      } else if (GmTHour + roundedGmtOffset >= 12 && remotePeriod === 'PM') {
+      } else if (GmtHour + roundedGmtOffset >= 12 &&
+        remotePeriod === 'PM') {
         return true
       } else {
         return false
       }
     }
 
-    expect(getHour(localTimeTest)).to.equal(getHour(localDate))
-    expect(getMinute(localTimeTest)).to.equal(getMinute(localDate))
-    expect(getPeriod(localTimeTest)).to.equal(getPeriod(localDate))
+    expect(getHour(localDateTest)).to.equal(getHour(localDate))
+    expect(getMinute(localDateTest)).to.equal(getMinute(localDate))
+    expect(getPeriod(localDateTest)).to.equal(getPeriod(localDate))
 
-    expect(getHour(chicago)).to.equal(getHour(GmtTime) - 5)
-    expect(getMinute(chicago)).to.equal(getMinute(GmtTime))
-    expect(checkPeriod(chicago, -5)).to.be.true
+    expect(getHour(chicagoDate)).to.equal(getHour(GmtTime) - 5)
+    expect(getMinute(chicagoDate)).to.equal(getMinute(GmtTime))
+    expect(checkPeriod(chicagoDate, -5)).to.be.true
 
-    expect(getHour(newYork)).to.equal(getHour(GmtTime) - 4)
-    expect(getMinute(newYork)).to.equal(getMinute(GmtTime))
-    expect(checkPeriod(newYork, -4)).to.be.true
+    expect(getHour(newYorkDate)).to.equal(getHour(GmtTime) - 4)
+    expect(getMinute(newYorkDate)).to.equal(getMinute(GmtTime))
+    expect(checkPeriod(newYorkDate, -4)).to.be.true
 
-    if (getMinute(mumbai) >= 30) {
-      expect(getHour(mumbai)).to.equal(getHour(GmtTime) + 5)
+    if (getMinute(mumbaiDate) >= 30) {
+      expect(getHour(mumbaiDate)).to.equal(getHour(GmtTime) + 5)
     } else {
-      expect(getHour(mumbai)).to.equal(getHour(GmtTime) + 6)
+      expect(getHour(mumbaiDate)).to.equal(getHour(GmtTime) + 6)
     }
-    expect(getMinute(mumbai) % 60).to.equal((getMinute(GmtTime) + 30) % 60)
-    expect(checkPeriod(mumbai, 5.5)).to.be.true
+    expect(getMinute(mumbaiDate) % 60).to.equal((getMinute(GmtTime) + 30) % 60)
+    expect(checkPeriod(mumbaiDate, 5.5)).to.be.true
   })
 })
 
@@ -106,13 +115,14 @@ describe('getConditions', () => {
 })
 
 describe('printTimeAndConditions', () => {
-  it('should return a string', async () => {
+  it('should return an array of strings', async () => {
     const output = await printTimeAndConditions([
-      '/Chicago',
+      'Chicago',
       10028,
       'Mumbai',
       "No Man's Land"
     ])
-    expect(output).to.be.a('string')
+    expect(output).to.be.an('array')
+    output.forEach(e => expect(e).to.be.a('string'))
   })
 })

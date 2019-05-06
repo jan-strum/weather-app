@@ -1,14 +1,10 @@
-/* eslint-disable quotes */
 const axios = require('axios')
 const express = require('express')
 const app = express()
 
-const PORT = 1337
-
 const API_KEY = 'QryQ0OtaX1UugKQiAG2UXAWUschkpVsX'
 
 const getLocationData = async locationString => {
-  locationString = locationString + ''
   try {
     const response = await axios({
       method: 'get',
@@ -21,34 +17,37 @@ const getLocationData = async locationString => {
       return { name, locationKey, GmtOffset }
     } else {
       return {
-        name: undefined,
-        locationKey: undefined,
-        GmtOffset: undefined,
+        name: locationString,
+        locationKey: 'N/A',
+        GmtOffset: 'N/A',
         error: `No location matching "${locationString}" could be found. Please try again.`
       }
     }
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log(error)
   }
 }
 
-const getDate = GmtOffset => {
-  const msPerMinute = 60000,
-    msPerHour = 3600000
+const getDate = GmtOffsetHr => {
+  const msPerMn = 60000,
+        msPerHr = 3600000
 
-  const remoteUtc = GmtOffset * msPerHour
+  const remoteGmtOffsetMs = GmtOffsetHr * msPerHr
 
   const localDate = new Date()
-  const localUtc =
-    localDate.getTime() + localDate.getTimezoneOffset() * msPerMinute
+  const localTime = localDate.getTime()
+  const localTimezoneOffset = localDate.getTimezoneOffset()
 
-  const remoteDate = new Date(localUtc + remoteUtc)
+  const localGmtOffsetMs = localTime + localTimezoneOffset * msPerMn
+
+  const totalGmtOffsetMs = localGmtOffsetMs + remoteGmtOffsetMs
+
+  const remoteDate = new Date(totalGmtOffsetMs)
 
   return remoteDate // We will return a date instance so that we can easily test that the period (AM/PM) is correct, but we will coerce this into a LocalTimeString in printTimeAndConditions for logging purposes.
 }
 
 const getConditions = async locationKey => {
-  locationKey = locationKey + ''
   try {
     const response = await axios({
       method: 'get',
@@ -58,16 +57,43 @@ const getConditions = async locationKey => {
     const unit = response.data[0].Temperature.Imperial.Unit
 
     return `${temperature} ${unit}`
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log(error)
   }
+}
+
+const printTimeAndConditions = locationsArray => {
+  const outputArray = []
+
+  locationsArray.forEach(async location => {
+    const locationData = await getLocationData(location)
+    if (!locationData.error) {
+      const { name, locationKey, GmtOffset } = locationData
+      const time = getDate(GmtOffset).toLocaleTimeString()
+      const conditions = await getConditions(locationKey)
+      console.log(
+        `The time in ${name} is ${time}. The temperature is ${conditions}.\n`
+      )
+      outputArray.push(
+        `The time in ${name} is ${time}. The temperature is ${conditions}.\n`
+      )
+    } else {
+      console.log(locationData.error)
+      outputArray.push(`locationData.error\n`)
+    }
+  });
+
+  return outputArray
 }
 
 module.exports = {
   getLocationData,
   getDate,
-  getConditions
+  getConditions,
+  printTimeAndConditions
 }
+
+const PORT = 1337
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`)
