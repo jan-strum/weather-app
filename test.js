@@ -35,9 +35,9 @@ describe('getDate', () => {
     const GmtTime = new Date(localGmtOffsetMs)
 
     const localDateTest = getDate(localGmtOffsetHr),
-      chicagoDate = getDate(-5),
-      newYorkDate = getDate(-4),
-      mumbaiDate = getDate(5.5)
+          chicagoDate = getDate(-5),
+          newYorkDate = getDate(-4),
+          mumbaiDate = getDate(5.5)
 
     // We will compare hours, minutes, and period (AM and PM), but not seconds, so as to account for computation time.
     const getHour = date => {
