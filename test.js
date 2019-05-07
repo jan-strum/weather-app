@@ -32,18 +32,17 @@ describe('getLocationData', () => {
 })
 
 describe('getDate', () => {
-  let chicagoDate, newYorkDate, mumbaiDate
+  let chicagoDate, newYorkDate
   beforeEach(() => {
     chicagoDate = getDate(-5)
     newYorkDate = getDate(-4)
-    mumbaiDate = getDate(5.5)
   })
 
   it('should return a time as a Date instance.', () => {
     const time = getDate(-6)
     expect(time).to.be.an.instanceOf(Date)
   })
-  it('should return a time with the correct hour.', () => {  // We will check hours, minutes, and period (AM and PM), but not seconds, so as to account for computation time.
+  it('should return a time with the correct hour.', () => {  // We will check hours, minutes, and period (AM and PM), but not seconds, so as to account for differences in seconds due to computation time.
     expect(getHour(chicagoDate)).to.equal(getHour(GmtTime, -5))
     expect(getHour(newYorkDate)).to.equal(getHour(GmtTime, -4))
   })
@@ -56,6 +55,8 @@ describe('getDate', () => {
     expect(checkPeriod(newYorkDate, -4)).to.be.true
   })
   it('should return the correct time provided a GMT offset that is a decimal.', () => {
+    const mumbaiDate = getDate(5.5)
+
     if (getMinute(mumbaiDate) >= 30) {
       expect(getHour(mumbaiDate)).to.equal(getHour(GmtTime, 5))
     } else {
