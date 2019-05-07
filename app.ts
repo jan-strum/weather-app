@@ -17,8 +17,10 @@ const getLocationData = async (location: string | number) => {
       const name = response.data[0].LocalizedName
       const locationKey = response.data[0].Key
       const GmtOffsetHr = response.data[0].TimeZone.GmtOffset
+
       return { name, locationKey, GmtOffsetHr }
     } else {
+
       return { // We will return an object with the same keys as above, in addition to an 'error' key, for ease of testing.
         name: location,
         locationKey: 'N/A',
@@ -48,10 +50,8 @@ const getCurrentConditions = async (locationKey: string) => {
       url: `http://dataservice.accuweather.com/currentconditions/v1/${locationKey}.json?language=en&apikey=${API_KEY}`
     })
 
-    const temperature = response.data[0]
-      .Temperature.Imperial.Value
-    const unit = response.data[0]
-      .Temperature.Imperial.Unit
+    const temperature = response.data[0].Temperature.Imperial.Value
+    const unit = response.data[0].Temperature.Imperial.Unit
 
     const currentconditions = `${temperature} ${unit}`
 
@@ -64,7 +64,7 @@ const getCurrentConditions = async (locationKey: string) => {
 
 const buildMessage = async (location: string | number) => {
   const locationData = await getLocationData(location)
-  let message
+  let message: string
 
   if (!locationData.error) {
     const { name, locationKey, GmtOffsetHr } = locationData

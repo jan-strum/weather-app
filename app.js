@@ -93,10 +93,8 @@ var getCurrentConditions = function (locationKey) { return __awaiter(_this, void
                     })];
             case 1:
                 response = _a.sent();
-                temperature = response.data[0]
-                    .Temperature.Imperial.Value;
-                unit = response.data[0]
-                    .Temperature.Imperial.Unit;
+                temperature = response.data[0].Temperature.Imperial.Value;
+                unit = response.data[0].Temperature.Imperial.Unit;
                 currentconditions = temperature + " " + unit;
                 return [2 /*return*/, currentconditions];
             case 2:

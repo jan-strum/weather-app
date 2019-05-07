@@ -9,7 +9,6 @@ const {
 } = require('./app')
 const {
   getHour,
-  getHourWithGmtOffset,
   getMinute,
   checkPeriod,
   GmtTime,
@@ -38,8 +37,8 @@ describe('getDate', () => {
     expect(time).to.be.an.instanceOf(Date)
   })
   it('should return a time with the correct hour.', () => {  // We will check hours, minutes, and period (AM and PM), but not seconds, so as to account for computation time.
-    expect(getHour(chicagoDate)).to.equal(getHourWithGmtOffset(GmtTime, -5))
-    expect(getHour(newYorkDate)).to.equal(getHourWithGmtOffset(GmtTime, -4))
+    expect(getHour(chicagoDate)).to.equal(getHour(GmtTime, -5))
+    expect(getHour(newYorkDate)).to.equal(getHour(GmtTime, -4))
   })
   it('should return a time with the correct minute.', () => {
     expect(getMinute(chicagoDate)).to.equal(getMinute(GmtTime))
@@ -51,9 +50,9 @@ describe('getDate', () => {
   })
   it('should return the correct time provided a GMT offset that is a decimal.', () => {
     if (getMinute(mumbaiDate) >= 30) {
-      expect(getHour(mumbaiDate)).to.equal(getHourWithGmtOffset(GmtTime, 5))
+      expect(getHour(mumbaiDate)).to.equal(getHour(GmtTime, 5))
     } else {
-      expect(getHour(mumbaiDate)).to.equal(getHourWithGmtOffset(GmtTime, 6))
+      expect(getHour(mumbaiDate)).to.equal(getHour(GmtTime, 6))
     }
     expect(getMinute(mumbaiDate) % 60).to.equal((getMinute(GmtTime) + 30) % 60)
     expect(checkPeriod(mumbaiDate, 5.5)).to.be.true

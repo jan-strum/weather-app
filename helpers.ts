@@ -8,14 +8,12 @@ const localGmtOffsetMs = localTime + localGmtOffsetMn * msPerMn
 
 const GmtTime = new Date(localGmtOffsetMs)
 
-const getHour = (date: object) => Number(date
+const getHour = (date: object, GmtOffsetHr = 0) => Number(date
   .toString()
   .split(' ')[4]
   .split(':')[0]
-) % 24
-
-
-const getHourWithGmtOffset = (date: object, GmtOffsetHr: number) => (getHour(date) + GmtOffsetHr) % 24
+) + GmtOffsetHr
+% 24
 
 const getMinute = date => Number(
   date
@@ -36,12 +34,7 @@ const checkPeriod = (date: object, GmtOffsetHr: number) => {
   }
 
   const remotePeriod = getPeriod(date)
-  const hour = getHourWithGmtOffset(GmtTime, GmtOffsetHr)
-
-  console.log('offset', GmtOffsetHr)
-  console.log('rounded', GmtOffsetHr)
-  console.log('remotePeriod', remotePeriod)
-  console.log('hour ' + hour + '\n')
+  const hour = getHour(GmtTime, GmtOffsetHr)
 
   if (hour < 12 &&
     remotePeriod === 'AM') {
@@ -57,7 +50,6 @@ const checkPeriod = (date: object, GmtOffsetHr: number) => {
 
 module.exports = {
   getHour,
-  getHourWithGmtOffset,
   getMinute,
   getPeriod,
   checkPeriod,

@@ -6,11 +6,14 @@ var localGmtOffsetMn = localDate.getTimezoneOffset();
 var localTime = localDate.getTime();
 var localGmtOffsetMs = localTime + localGmtOffsetMn * msPerMn;
 var GmtTime = new Date(localGmtOffsetMs);
-var getHour = function (date) { return Number(date
-    .toString()
-    .split(' ')[4]
-    .split(':')[0]) % 24; };
-var getHourWithGmtOffset = function (date, GmtOffsetHr) { return (getHour(date) + GmtOffsetHr) % 24; };
+var getHour = function (date, GmtOffsetHr) {
+    if (GmtOffsetHr === void 0) { GmtOffsetHr = 0; }
+    return Number(date
+        .toString()
+        .split(' ')[4]
+        .split(':')[0]) + GmtOffsetHr
+        % 24;
+};
 var getMinute = function (date) { return Number(date
     .toString()
     .split(' ')[4]
@@ -25,11 +28,7 @@ var checkPeriod = function (date, GmtOffsetHr) {
                 : Math.ceil(GmtOffsetHr);
     }
     var remotePeriod = getPeriod(date);
-    var hour = getHourWithGmtOffset(GmtTime, GmtOffsetHr);
-    console.log('offset', GmtOffsetHr);
-    console.log('rounded', GmtOffsetHr);
-    console.log('remotePeriod', remotePeriod);
-    console.log('hour ' + hour + '\n');
+    var hour = getHour(GmtTime, GmtOffsetHr);
     if (hour < 12 &&
         remotePeriod === 'AM') {
         return true;
@@ -44,7 +43,6 @@ var checkPeriod = function (date, GmtOffsetHr) {
 };
 module.exports = {
     getHour: getHour,
-    getHourWithGmtOffset: getHourWithGmtOffset,
     getMinute: getMinute,
     getPeriod: getPeriod,
     checkPeriod: checkPeriod,
