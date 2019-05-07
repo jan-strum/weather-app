@@ -58,12 +58,7 @@ var getLocationData = function (location) { return __awaiter(_this, void 0, void
                     return [2 /*return*/, { name: name_1, locationKey: locationKey, GmtOffsetHr: GmtOffsetHr }];
                 }
                 else {
-                    return [2 /*return*/, {
-                            name: location,
-                            locationKey: 'N/A',
-                            GmtOffsetHr: 'N/A',
-                            error: "No location matching \"" + location + "\" could be found. Please try again.\n"
-                        }];
+                    return [2 /*return*/, { error: "No location matching \"" + location + "\" could be found. Please try again.\n" }];
                 }
                 return [3 /*break*/, 3];
             case 2:

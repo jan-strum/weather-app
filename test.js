@@ -15,12 +15,19 @@ const {
 } = require('./helpers')
 
 describe('getLocationData', () => {
-  it('should return an object with name, locationKey, and GmtOffset properties given a valid input.', async () => {
-    const locationData = await getLocationData('Berlin')
-    expect(locationData).to.be.an('object')
-    expect(locationData).to.have.property('name')
-    expect(locationData).to.have.property('locationKey')
-    expect(locationData).to.have.property('GmtOffsetHr')
+  it('should return an object with name, locationKey, and GmtOffset data given a valid input.', async () => {
+    const validLocationData = await getLocationData('Berlin')
+    expect(validLocationData).to.be.an('object')
+    expect(validLocationData).to.have.property('name')
+    expect(validLocationData.name).to.be.a('string')
+    expect(validLocationData.locationKey).to.be.a('string')
+    expect(validLocationData.GmtOffsetHr).to.be.a('number')
+  })
+  it('should return an object with an error property when given an invalid input.', async () => {
+    const invalidLocationData = await getLocationData('Neverland')
+    expect(invalidLocationData).to.be.an('object')
+    expect(invalidLocationData).to.have.property('error')
+    expect(invalidLocationData.error).to.be.a('string')
   })
 })
 

@@ -21,12 +21,7 @@ const getLocationData = async (location: string | number) => {
       return { name, locationKey, GmtOffsetHr }
     } else {
 
-      return { // We will return an object with the same keys as above, in addition to an 'error' key, for ease of testing.
-        name: location,
-        locationKey: 'N/A',
-        GmtOffsetHr: 'N/A',
-        error: `No location matching "${location}" could be found. Please try again.\n`
-      }
+      return { error: `No location matching "${location}" could be found. Please try again.\n` }
     }
   } catch (error) {
     console.log(error)
@@ -64,7 +59,7 @@ const getCurrentConditions = async (locationKey: string) => {
 
 const buildMessage = async (location: string | number) => {
   const locationData = await getLocationData(location)
-  let message: string
+  let message: object | string
 
   if (!locationData.error) {
     const { name, locationKey, GmtOffsetHr } = locationData
